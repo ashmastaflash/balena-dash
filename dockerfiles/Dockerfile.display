@@ -1,0 +1,32 @@
+FROM balenalib/raspberrypi3:buster
+
+ENV UDEV=1
+
+ENV URL="https://duckduckgo.com"
+
+
+# Install desktop environment
+RUN install_packages xserver-xorg-core \
+    xinit lxsession desktop-file-utils \
+    raspberrypi-ui-mods rpd-icons \
+    gtk2-engines-clearlookspix \
+    matchbox-keyboard firefox-esr
+
+# disable lxpolkit popup warning
+RUN mv /usr/bin/lxpolkit /usr/bin/lxpolkit.bak
+
+RUN echo "#!/bin/bash" > /etc/X11/xinit/xserverrc \
+  && echo "" >> /etc/X11/xinit/xserverrc \
+  && echo 'exec /usr/bin/X -nocursor -s 0 dpms -nolisten tcp "$@"' >> /etc/X11/xinit/xserverrc
+
+# Setting working directory
+WORKDIR /usr/src/app
+
+COPY ./applications/display/start.sh start.sh
+
+# Adding things to autostart will cause them to be launchd automatically on starup
+COPY ./applications/display/autostart /etc/xdg/lxsession/LXDE-pi/autostart
+
+COPY ./applications/display/policies.json /usr/lib/firefox-esr/distribution/
+
+CMD ["bash", "start.sh"]
