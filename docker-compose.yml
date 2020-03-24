@@ -5,11 +5,5 @@ services:
       context: ./
       dockerfile: ./dockerfiles/Dockerfile.display
     privileged: true
-    depends_on:
-      - "dashboard"
-    links:
-      - "dashboard"
     labels:
       io.balena.features.dbus: "1"
-volumes:
-    resin-data:
